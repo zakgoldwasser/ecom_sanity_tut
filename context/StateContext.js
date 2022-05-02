@@ -5,13 +5,27 @@ const Context = createContext()
 
 export const StateContext = ({children}) => {
     const [showCart,setShowCart] = useState(false)
-    const [cartItems, setCartItems] = useState([])
+    const [cartItems, setCartItems] = useState([]);
     const [totalPrice,setTotalPrice] = useState(0)
     const [totalQuantities, setTotalQuantities] = useState(0)
     const [qty,setQty] = useState(1)
 
     let foundProduct
     let index
+
+    useEffect(()=>{
+        const locCartItems=window.localStorage.getItem('cartItems') 
+        if(locCartItems) {setCartItems(JSON.parse(locCartItems))}
+        const locTotalPrice=window.localStorage.getItem('totalPrice') 
+        if(locTotalPrice){setTotalPrice(JSON.parse(locTotalPrice))}
+        const locTotalQuantities=window.localStorage.getItem('totalQuantities') 
+        if(locTotalQuantities){setTotalQuantities(JSON.parse(locTotalQuantities))}
+    },[])
+    useEffect(()=>{
+        window.localStorage.setItem('cartItems',JSON.stringify(cartItems)) 
+        window.localStorage.setItem('totalPrice',JSON.stringify(totalPrice))
+        window.localStorage.setItem('totalQuantities',JSON.stringify(totalQuantities))
+    },[cartItems,totalPrice,totalQuantities])
 
     const onAdd = (product, quantity) =>{
         const checkProductInCart = cartItems.find((item)=>item._id===product._id)
@@ -32,6 +46,7 @@ export const StateContext = ({children}) => {
             setCartItems([...cartItems,{...product}])
         }
         toast.success(`${qty} ${product.name} added to the cart`)
+        
     }
     const onRemove = (product) => {
         foundProduct = cartItems.find((item)=> item._id === product._id)
